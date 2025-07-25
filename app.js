@@ -6,6 +6,8 @@ require('dotenv').config();
 const connectDB = require('./config/db'); // ⬅ Database connection
 const propertyRoutes = require('./routes/property.routes'); // Your property routes
 const Registerroutes = require('./routes/Registerroutes');
+const Loginroutes = require('./routes/Loginroutes');
+const Forgotpwroute = require('./routes/Forgotpwroutes');
 
 
 const app = express();
@@ -21,7 +23,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/properties', propertyRoutes);
-app.use('./api/user',Registerroutes);
+app.use('/api/user', Registerroutes); 
+app.use('/api/user',Loginroutes);
+app.use('/api/user',Forgotpwroute);
+
 
 // Start Server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

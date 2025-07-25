@@ -1,11 +1,11 @@
-const user = require('../models/Registarmodel');
+const User = require('../models/Registarmodel');
 const bcrypt = require('bcryptjs');
 
 exports.registerUser = async(req,res) => {
     try{
         const {username,email,password } = req.body;
 
-        const exitingUser = await User.findone({ $or:[{email},{username}]})
+        const exitingUser = await User.findOne({ $or:[{email},{username}]})
         if (exitingUser){
             return res.status(400).json({ message: 'User already exists' });
         }
