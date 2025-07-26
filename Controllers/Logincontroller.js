@@ -1,40 +1,34 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // ✅ Import this
+const User = require('../models/Registarmodel');
+const bcrypt = require('bcryptjs');
 
-function Login() {
-  const [emailOrUsername, setEmailOrUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+exports.loginUser = async (req, res) => {
+  const { emailOrUsername, password } = req.body;
 
-  const navigate = useNavigate(); // ✅ Initialize navigation
+  try {
+    // Find user by email or username
+    const user = await User.findOne({
+      $or: [{ email: emailOrUsername }, { username: emailOrUsername }]
+    });
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    try {
-      const res = await axios.post('http://localhost:3001/api/user/login', {
-        emailOrUsername,
-        password,
-      });
-
-      setMessage(res.data.message);
-
-      // ✅ Navigate to home page on success
-      if (res.status === 200) {
-        navigate('/home');
-      }
-
-    } catch (error) {
-      setMessage(error.response?.data?.message || 'Login failed');
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' });
     }
-  };
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4">
-      {/* form UI */}
-    </div>
-  );
-}
+    // Compare hashed password
+    const isMatch = await bcrypt.compare(password, user.password);
 
-export default Login;
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Login successful
+    return res.status(200).json({
+      message: 'Login successful',
+      username: user.username
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
