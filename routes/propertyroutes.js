@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const propertyController = require('../controllers/property.controller');
+const propertyController = require('../controllers/propertycontroller'); // ✅ ensure lowercase 'controllers'
 
 // File Upload Config
 const storage = multer.diskStorage({
@@ -15,7 +15,13 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// POST: Create property
+// Create a new property
 router.post('/', upload.single('image'), propertyController.createProperty);
+
+// Get all properties
+router.get('/', propertyController.getAllProperties);
+
+// Get properties by university
+router.get('/university/:university', propertyController.getPropertiesByUniversity);
 
 module.exports = router;

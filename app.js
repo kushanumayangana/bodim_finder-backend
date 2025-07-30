@@ -3,8 +3,9 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+
 const connectDB = require('./config/db'); // ⬅ Database connection
-const propertyRoutes = require('./routes/property.routes'); // Your property routes
+const propertyRoutes = require('./routes/propertyroutes'); // Your property routes
 const Registerroutes = require('./routes/Registerroutes');
 const Loginroutes = require('./routes/Loginroutes');
 const Forgotpwroute = require('./routes/Forgotpwroutes');

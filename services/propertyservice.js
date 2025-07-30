@@ -1,5 +1,6 @@
-const Property = require('../models/property.model');
+const Property = require('../models/propertymodel');
 
+// Create a new property
 exports.createProperty = async (data, imagePath) => {
   const {
     title,
@@ -11,7 +12,7 @@ exports.createProperty = async (data, imagePath) => {
     ownerName,
     contactNumber,
     email,
-    univercity,
+    university,
     city,
     adress,
     location,
@@ -32,7 +33,7 @@ exports.createProperty = async (data, imagePath) => {
     contactNumber,
     email,
     image: imagePath,
-    univercity,
+    university,
     city,
     adress,
     location,
@@ -44,3 +45,4 @@ exports.createProperty = async (data, imagePath) => {
 
   return await newProperty.save();
 };
+
