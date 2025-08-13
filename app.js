@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 
@@ -9,6 +10,7 @@ const propertyRoutes = require('./routes/propertyroutes'); // Your property rout
 const Registerroutes = require('./routes/Registerroutes');
 const Loginroutes = require('./routes/Loginroutes');
 const Forgotpwroute = require('./routes/Forgotpwroutes');
+const commentRoute = require('./routes/commentRoute');
 
 
 const app = express();
@@ -20,13 +22,27 @@ connectDB();
 // Middleware
 app.use(cors());
 app.use(express.json()); // ✅ fixed syntax error
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Debug: Check if uploads directory exists
+const uploadsPath = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsPath)) {
+  console.log('Creating uploads directory...');
+  fs.mkdirSync(uploadsPath, { recursive: true });
+}
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(uploadsPath));
+console.log('Static files served from:', uploadsPath);
 
 // Routes
 app.use('/api/properties', propertyRoutes);
+app.use('/api/properties', commentRoute);
+
 app.use('/api/user', Registerroutes); 
 app.use('/api/user',Loginroutes);
 app.use('/api/user',Forgotpwroute);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 
 // Start Server

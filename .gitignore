@@ -1,0 +1,93 @@
+# ───────── Node / Package Managers ─────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+
+# Keep lockfiles – they should be committed (npm/yarn/pnpm)
+# (Do NOT ignore: package-lock.json, yarn.lock, pnpm-lock.yaml)
+
+# ───────── Environment Files ─────────
+.env
+.env.*
+!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ───────── Logs & PIDs ─────────
+logs/
+*.log
+*.log.*
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ───────── Tests / Coverage ─────────
+coverage/
+.nyc_output/
+.jest/
+*.lcov
+
+# ───────── Build / Caches / Temp ─────────
+dist/
+build/
+tmp/
+temp/
+.cache/
+.parcel-cache/
+.eslintcache
+.cache-loader/
+*.tsbuildinfo
+
+# Next.js (in case you experiment with it for docs or admin)
+.next/
+out/
+
+# ───────── TypeScript (if used) ─────────
+# (keep your src/*.ts files committed; this only ignores build artifacts)
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# ───────── File Uploads (optional) ─────────
+uploads/
+!uploads/.gitkeep
+
+# ───────── Database / Dumps ─────────
+dump/
+*.rdb
+*.sqlite
+*.sqlite-journal
+*.db
+*.db-journal
+*.tgz
+*.archive*
+
+# ───────── Process Managers ─────────
+.pm2/
+
+# ───────── IDE / OS files ─────────
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# ───────── Docker (local) ─────────
+docker-data/
+docker-volume/
+docker-compose.override.yml
+
+# ───────── Hosting / CI Artifacts ─────────
+.vercel/
+.netlify/
+firebase-debug.log
+.firebase/
+.gcloud/
+
+# ───────── Misc Tooling ─────────
+.sentryclirc

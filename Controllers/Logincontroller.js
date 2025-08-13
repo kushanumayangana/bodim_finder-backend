@@ -1,5 +1,7 @@
 const User = require('../models/Registarmodel');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 exports.loginUser = async (req, res) => {
   const { emailOrUsername, password } = req.body;
@@ -21,10 +23,18 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Login successful
+    // Generate token
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      process.env.jwt_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    // Return token and username
     return res.status(200).json({
       message: 'Login successful',
-      username: user.username
+      username: user.username,
+      token,
     });
 
   } catch (error) {
