@@ -11,6 +11,7 @@ const Registerroutes = require('./routes/Registerroutes');
 const Loginroutes = require('./routes/Loginroutes');
 const Forgotpwroute = require('./routes/Forgotpwroutes');
 const commentRoute = require('./routes/commentRoute');
+const feedbackRoutes = require('./routes/feedbackRoutes');
 
 
 const app = express();
@@ -41,6 +42,7 @@ app.use('/api/properties', commentRoute);
 app.use('/api/user', Registerroutes); 
 app.use('/api/user',Loginroutes);
 app.use('/api/user',Forgotpwroute);
+app.use('/api/feedback', feedbackRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 

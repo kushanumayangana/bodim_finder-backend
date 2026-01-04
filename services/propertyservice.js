@@ -1,6 +1,7 @@
 const Property = require('../models/propertymodel');
 
 // Create a new property
+// imagePath may be a string (single filename) or an array of filenames
 exports.createProperty = async (data, imagePath) => {
   const {
     title,
@@ -32,7 +33,8 @@ exports.createProperty = async (data, imagePath) => {
     ownerName,
     contactNumber,
     email,
-    image: imagePath,
+    // normalize to imageUrl array to match the model
+    imageUrl: Array.isArray(imagePath) ? imagePath : (imagePath ? [imagePath] : []),
     university,
     city,
     adress,

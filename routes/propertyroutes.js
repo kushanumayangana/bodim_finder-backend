@@ -11,13 +11,27 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = file.originalname.split('.').pop();
-    cb(null, `${Date.now()}.${ext}`);
+    cb(null, `${Date.now()}-${file.originalname}`);
   }
 });
-const upload = multer({ storage });
+// Multer with file size limit and image-only filter
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB per file
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files are allowed'));
+    }
+    cb(null, true);
+  }
+});
 
-// Create a new property (protected route)
-router.post('/create', authMiddleware, upload.single('image'), propertyController.createProperty);
+// Create a new property (protected route) – allow up to 10 images
+// Accept files under 'images' or 'image' field names to be more tolerant of client-side field naming
+router.post('/create', authMiddleware, upload.fields([
+  { name: 'images', maxCount: 10 },
+  { name: 'image', maxCount: 10 }
+]), propertyController.createProperty);
 
 // Get all properties
 router.get('/all', propertyController.getAllProperties);
@@ -31,8 +45,12 @@ router.get('/user/:userId', propertyController.getPropertiesByUser);
 // Get property by ID
 router.get('/:id', propertyController.getPropertyById);
 
-// Update property (must come after more specific routes)
-router.put('/:id', authMiddleware, upload.single('image'), propertyController.updateProperty);
+// Update property (must come after more specific routes) – allow updating images too
+// Accept multiple files under 'images' or 'image'
+router.put('/:id', authMiddleware, upload.fields([
+  { name: 'images', maxCount: 10 },
+  { name: 'image', maxCount: 10 }
+]), propertyController.updateProperty);
 
 // Delete property (must come after more specific routes)
 router.delete('/:id', authMiddleware, propertyController.deleteProperty);

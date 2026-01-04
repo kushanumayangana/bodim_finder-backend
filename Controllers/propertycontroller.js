@@ -22,9 +22,24 @@ exports.createProperty = async (req, res) => {
       bed
     } = req.body;
 
-    const imageUrl = req.file ? req.file.filename : null;
-    console.log('Uploaded file:', req.file);
-    console.log('Image URL saved:', imageUrl);
+    // Normalize uploaded files to an array regardless of multer mode
+    // multer.array => req.files is an array
+    // multer.fields => req.files is an object: { images: [...], image: [...] }
+    let filesArray = [];
+    if (Array.isArray(req.files)) {
+      filesArray = req.files;
+    } else if (req.files && typeof req.files === 'object') {
+      // collect all arrays in the object (images, image, etc.)
+      Object.values(req.files).forEach(v => {
+        if (Array.isArray(v)) filesArray = filesArray.concat(v);
+      });
+    }
+
+    const imageUrls = filesArray.length > 0 ? filesArray.map(file => file.filename) : [];
+
+    console.log('Uploaded files:', filesArray);
+    console.log('Image URLs saved:', imageUrls);
+
 
     // Get user info from auth middleware
     const userId = req.user?.id;
@@ -45,7 +60,7 @@ exports.createProperty = async (req, res) => {
       ownerName,
       contact,
       email,
-      imageUrl,
+  imageUrl: imageUrls,
       university,
       city,
       adress,
@@ -60,7 +75,15 @@ exports.createProperty = async (req, res) => {
 
     await newProperty.save();
 
-    res.status(201).json(newProperty);
+    // Return full image URLs for frontend convenience
+    const host = req.get('host');
+    const protocol = req.protocol;
+    const fullImageUrls = (newProperty.imageUrl || []).map(fn => `${protocol}://${host}/uploads/${fn}`);
+
+    const responseObj = newProperty.toObject();
+    responseObj.imageUrl = fullImageUrls;
+
+    res.status(201).json(responseObj);
   } catch (error) {
     console.error('Create property error:', error);
     res.status(500).json({ error: 'Failed to create property' });
@@ -70,7 +93,15 @@ exports.createProperty = async (req, res) => {
 exports.getAllProperties = async (req, res) => {
   try {
     const properties = await Property.find().sort({ createdAt: -1 });
-    res.status(200).json(properties);
+    // map filenames to full URLs
+    const host = req.get('host');
+    const protocol = req.protocol;
+    const mapped = properties.map(p => {
+      const obj = p.toObject();
+      obj.imageUrl = (obj.imageUrl || []).map(fn => `${protocol}://${host}/uploads/${fn}`);
+      return obj;
+    });
+    res.status(200).json(mapped);
   } catch (error) {
     console.error('Error fetching all properties:', error);
     res.status(500).json({ error: 'Failed to fetch all properties' });
@@ -83,7 +114,14 @@ exports.getPropertiesByUniversity = async (req, res) => {
     const properties = await Property.find({
       university: { $regex: new RegExp('^' + universityName + '$', 'i') }
     });
-    res.status(200).json(properties);
+    const host = req.get('host');
+    const protocol = req.protocol;
+    const mapped = properties.map(p => {
+      const obj = p.toObject();
+      obj.imageUrl = (obj.imageUrl || []).map(fn => `${protocol}://${host}/uploads/${fn}`);
+      return obj;
+    });
+    res.status(200).json(mapped);
   } catch (error) {
     console.error('Error fetching properties by university:', error);
     res.status(500).json({ error: 'Failed to fetch properties by university' });
@@ -96,7 +134,11 @@ exports.getPropertyById = async (req, res) => {
     if (!property) {
       return res.status(404).json({ error: 'Property not found' });
     }
-    res.status(200).json(property);
+    const host = req.get('host');
+    const protocol = req.protocol;
+    const obj = property.toObject();
+    obj.imageUrl = (obj.imageUrl || []).map(fn => `${protocol}://${host}/uploads/${fn}`);
+    res.status(200).json(obj);
   } catch (error) {
     console.error('Error fetching property by ID:', error);
     res.status(500).json({ error: 'Failed to fetch property' });
@@ -120,7 +162,14 @@ exports.getPropertiesByUser = async (req, res) => {
       properties = await Property.find({ username: userId });
     }
     
-    res.status(200).json(properties);
+    const host = req.get('host');
+    const protocol = req.protocol;
+    const mapped = properties.map(p => {
+      const obj = p.toObject();
+      obj.imageUrl = (obj.imageUrl || []).map(fn => `${protocol}://${host}/uploads/${fn}`);
+      return obj;
+    });
+    res.status(200).json(mapped);
   } catch (error) {
     console.error('Error fetching user properties:', error);
     res.status(500).json({ message: 'Failed to fetch user properties', error });
@@ -230,10 +279,22 @@ exports.updateProperty = async (req, res) => {
       bed: req.body.bed ? Number(req.body.bed) : property.bed,
     };
 
-    // Handle image upload if new image is provided
-    if (req.file) {
-      updateData.imageUrl = req.file.filename;
-      console.log('New image uploaded:', req.file.filename);
+    // Handle image upload(s) if new images are provided.
+    // Normalize req.files like above
+    let updateFilesArray = [];
+    if (Array.isArray(req.files)) {
+      updateFilesArray = req.files;
+    } else if (req.files && typeof req.files === 'object') {
+      Object.values(req.files).forEach(v => {
+        if (Array.isArray(v)) updateFilesArray = updateFilesArray.concat(v);
+      });
+    }
+
+    if (updateFilesArray.length > 0) {
+      // Append new uploaded filenames to existing imageUrl array
+      const newImageFilenames = updateFilesArray.map(f => f.filename);
+      updateData.imageUrl = (property.imageUrl || []).concat(newImageFilenames);
+      console.log('New images uploaded:', newImageFilenames);
     }
 
     // Update the property

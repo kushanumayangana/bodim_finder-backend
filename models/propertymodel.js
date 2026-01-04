@@ -28,7 +28,7 @@ const propertySchema = new mongoose.Schema({
   },
   gender: {
     type: String,
-    enum: ['Male', 'Female', 'Any'],
+    enum: ['Male', 'Female', 'Any', 'Both'],
     required: true
   },
   rent: {
@@ -80,7 +80,8 @@ const propertySchema = new mongoose.Schema({
     default: 0
   },
   imageUrl: {
-    type: String
+    type: [String],
+    default: []
   },
   comments: [commentSchema],
   createdAt: {
